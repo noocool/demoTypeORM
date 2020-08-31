@@ -39,10 +39,6 @@ router.post('/token', async (req, res) => {
     }
 });
 
-router.post("/DangNhap", async (req, res, next) => {
-    const findUser = await nguoiDungRepository.findOne(req.body);
-});
-
 const ProtectedRoutes = express.Router();
 
 router.use('/token', ProtectedRoutes);
@@ -72,12 +68,35 @@ ProtectedRoutes.get('/LayDanhSachNguoiDun', async (req, res) => {
     }
 });
 
+router.post("/DangNhap", async (req, res, next) => {
+    try {
+        const findUser = await nguoiDungRepository.findOne({ where: req.body });
+        if(findUser) {
+            res.status(200).json(findUser);
+        } else {
+            res.status(500).json({ message: "tai khoan hoac mat khau khong dung!"});
+        }
+    } catch(err) {
+        res.json({ message: err.message });
+    }
+});
+
 router.get('/LayDanhSachNguoiDung', async (req, res) => {
     try {
         const users = await nguoiDungRepository.find();
         res.json(users);
     } catch(err) {
         res.json({ message: err.message });
+    }
+});
+
+router.post('/ThemNguoiDung', async (req, res) => {
+    const user = await nguoiDungRepository.create(req.body);
+    try {
+        const newUser = await nguoiDungRepository.save(user);
+        res.status(201).json(newUser);
+    } catch(err) {
+        res.status(400).json({ message: err.message });
     }
 });
 
